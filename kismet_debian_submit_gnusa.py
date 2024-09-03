@@ -2,7 +2,7 @@ import requests
 import re
 import numpy as np
 import uuid
-
+import time
 #import json
 from datetime import datetime
 
@@ -212,4 +212,6 @@ def main():
             #submit_device_data_print(device)
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+        time.sleep(5)
