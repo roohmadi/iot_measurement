@@ -13,17 +13,25 @@ import urllib.request
 import datetime
 from datetime import date
 from datetime import datetime
+import os, glob
 
 #import json
 #from datetime import datetime
-global device_id, resend_time, jam, last_send
+global device_id, resend_time, jam, last_send, file_del_days
 device_id = ""#"DENCITY-Playup.2409.00001"
 resend_time = 10
 jam = 0
 last_send = 0
+# hari delete file kismet
+file_del_days = 10
 
 KISMET_USER = "iot"
 KISMET_PASSWORD = "waraswae"
+
+username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
+
+path_kismet_data = os.path.expanduser(f'~{username}')
+print(path_kismet_data)
 
 # URL Kismet API
 
@@ -129,7 +137,43 @@ class App:
         #mac_address_id = "7C:83:34:BB:74:D1"
         
         return mac_address_id
+    
+    def date_filename (self):
+        current_time = datetime.datetime.now()        
+        str_tgl = str(current_time.year) + "_" + str(current_time.month) + "_" + str(current_time.day)
+        return str(str_tgl)
+    
+    def get_date_time_file (self):
+        current_time = datetime.datetime.now()
+        #print(current_time)
+        tgl = str(current_time.year) + "-" + str(current_time.month) + "-" + str(current_time.day)
+        #print(tgl)
+        jam = str(current_time.hour) + ":" + str(current_time.minute) + ":" + str(current_time.second)
+        #print(jam)
+        str_date_time = str(current_time.year) + "/" + str(current_time.month) + "/" + str(current_time.day) +" " + str(current_time.hour) + ":" + str(current_time.minute) + ":" + str(current_time.second)
         
+        #print(str_date_time)
+        return str_date_time
+    
+    def delete_old_file(self):
+        current_time = str(datetime.now().strftime("%Y%m%d"))
+        
+        os.chdir(path_kismet_data)
+        #for fileN in os.listdir(path_kismet_data):
+        for fileN in glob.glob("*.kismet"):
+            
+            x = fileN.split("-")
+            today = datetime.now().strftime("%Y-%m-%d")
+            #year = today.year
+            date_create = date(int(x[1][0:4]),int(x[1][4:6]),int(x[1][6:9]))            
+            get_diff_days = (date.today() - date_create).days
+            
+            # file_del_days
+            if get_diff_days > file_del_days:
+                isExistdelKISMET = os.path.exists(path_kismet_data + "/" + fileN)
+                if isExistdelKISMET:
+                    os.remove(path_kismet_data + "/" + fileN)
+    
     def get_device_id (self):
         global device_id
         data_device ={
@@ -314,6 +358,7 @@ class App:
         else:
             self.lbl_conval['text'] = ": Connection loss"
             print("connection loss")
+        self.delete_old_file()
             
         current_time = datetime.now()
         if jam != current_time.hour:
