@@ -19,14 +19,16 @@ import os, glob
 #from datetime import datetime
 global device_id, resend_time, jam, last_send, file_del_days
 device_id = ""#"DENCITY-Playup.2409.00001"
-resend_time = 10
+
 jam = 0
 last_send = 0
 # hari delete file kismet
 file_del_days = 10
+# periode cek data dan kirim ke server
+resend_time = 10
 
-KISMET_USER = "iot"
-KISMET_PASSWORD = "waraswae"
+KISMET_USER = "KISMET_USER"
+KISMET_PASSWORD = "KISMET_PASSWORD"
 
 username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
 
