@@ -11,8 +11,8 @@ global device_id, resend_time
 device_id = ""#"DENCITY-Playup.2409.00001"
 resend_time = 5
 
-KISMET_USER = "iot"
-KISMET_PASSWORD = "waraswae"
+KISMET_USER = "KISMET_USER"
+KISMET_PASSWORD = "KISMET_PASSWORD"
 
 # URL Kismet API
 
