@@ -23,8 +23,8 @@ last_send = 0
 # hari delete file kismet
 file_del_days = 10
 
-KISMET_USER = "USER_KISMET"
-KISMET_PASSWORD = "PASSWORD_KISMET"
+KISMET_USER = "iot"
+KISMET_PASSWORD = "waraswae"
 
 username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
 
@@ -137,86 +137,7 @@ def get_devices():
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-
-def submit_device_data_old(device):
-    mac_address = uuid.getnode()
-    mac_address_id = (':'.join(['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0,8*6,8)][::-1])).upper()
-
-    str_sig = f"{device.get('kismet.device.base.signal','N/A')}"
-    print(str_sig)
-    print(len(str_sig))
-    if len(str_sig) > 3:
-        sig = re.split(",",re.split("':", str_sig)[4])[0]
-        last_noise = re.split(",",re.split("':", str_sig)[3])[0]
-        min_noise = re.split(",",re.split("':", str_sig)[5])[0]
-        max_noise = re.split(",",re.split("':", str_sig)[7])[0]
-        if len(sig)>0:
-            int_sig = int(sig)
-            distance,min_dist, max_dist = estimate_distance(int_sig)
-        
-    first_stamp = int(f"{device.get('kismet.device.base.first_time', 'N/A')}")
-    last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
-    #print('first_stamp: ')
-    #print(first_stamp)
-    #print(type(first_stamp))
-    #dt = datetime.fromtimestamp(ts)
-    
-    data = {
-    "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiJERU5DSVRZIiwiaWF0IjoxNzI1NTI3NzY0fQ.1X0pGlp5MEB72489yGXN2re9jTF9B6HyJuxE054Bcsk",
-    "device_id": device_id,
-    "raw_data" : [{
-    "type":device.get('kismet.device.base.type', 'N/A'),
-    "channel":device.get('kismet.device.base.channel', 'N/A'),
-    "use": "",
-    "bitrate": "",
-    "active": "",
-    "frequency-known": device.get('kismet.device.base.frequency', 'N/A'),
-    "beacon-seen": datetime.fromtimestamp(first_stamp).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
-    "address": device.get('kismet.device.base.macaddr', 'N/A'),
-    "networl-ssid": device.get('kismet.device.base.name', 'N/A'),
-    "last-beacon": datetime.fromtimestamp(last_stamp).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
-    "beacon-strength": sig,
-    "signal-to-noise": "",
-    "ssid-source": "",
-    "network-station-count": "",
-    "use-of-freq": "",
-    "use-of-traffic": "",
-    "noise-floor": "",
-    "frequency-station-count": "",
-    "manuf": device.get('kismet.device.base.manuf', 'N/A'),
-    "last_noise": last_noise,
-    "min_noise": min_noise,
-    "max_noise": max_noise}
-    ]
-    }
-    
-    payload = {
-        "mac_address": device.get('kismet.device.base.macaddr', 'N/A'),
-        "device_name": device.get('kismet.device.base.name', 'N/A'),
-        "type": device.get('kismet.device.base.type', 'N/A'),
-        "first_seen": datetime.fromtimestamp(first_stamp),
-        "last_seen": datetime.fromtimestamp(last_stamp),
-        "strength_sig": sig,
-        "distance": distance,
-        "manufacturer": device.get('kismet.device.base.manuf', 'N/A'),
-        "frequency": device.get('kismet.device.base.frequency', 'N/A')
-    }
-    try:
-        print(data)
-        #print(headers)
-        
-        response = requests.post(url_data, headers=headers_data, json=data)
-        print("Status Code", response.status_code)
-        print("JSON Response ", response.json())
-        print(response)
-        
-        #response = requests.post(PHP_URL, data=payload)
-        #print(response)
-        #response.raise_for_status()
-        print(f"Data submitted successfully for MAC: {payload['mac_address']}")
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to submit data for MAC: {payload['mac_address']} - {e}")
-        
+     
 def submit_device_data(device):
     last_time = time.time()
     last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
@@ -233,6 +154,15 @@ def submit_device_data(device):
             if len(sig)>0:
                 int_sig = int(sig)
                 distance,min_dist, max_dist = estimate_distance(int_sig)
+            else:
+                    distance = 0
+                    min_dist = 0
+                    max_dist = 0
+        else:
+            sig = 0
+            distance = 0
+            min_dist = 0
+            max_dist = 0
         first_stamp = int(f"{device.get('kismet.device.base.first_time', 'N/A')}")
         last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
         
