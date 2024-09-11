@@ -256,7 +256,14 @@ class App:
     
             
     def submit_device_data(self, device):
-        global last_send
+        global last_send, sig, distance, min_dist, max_dist, last_noise, min_noise, max_noise
+        sig = 0
+        distance = 0
+        min_dist = 0
+        max_dist = 0
+        last_noise = 0
+        min_noise = 0
+        max_noise = 0
         last_time = time.time()
         #last_time
         last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
@@ -282,6 +289,9 @@ class App:
                 distance = 0
                 min_dist = 0
                 max_dist = 0
+                last_noise = 0
+                min_noise = 0
+                max_noise = 0
             first_stamp = int(f"{device.get('kismet.device.base.first_time', 'N/A')}")
             last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
             last_send = last_stamp
