@@ -5,14 +5,31 @@ import uuid
 import urllib.request
 import time
 
-#import json
-from datetime import datetime
-global device_id, resend_time
-device_id = ""#"DENCITY-Playup.2409.00001"
-resend_time = 5
+import os
+import shutil
+from os.path import exists
+import os, glob
 
-KISMET_USER = "KISMET_USER"
-KISMET_PASSWORD = "KISMET_PASSWORD"
+#import json
+from datetime import date
+from datetime import datetime
+global device_id, resend_time, mac_address_id,resend_time, jam, last_send, file_del_days
+mac_address_id = 0
+device_id = ""#"DENCITY-Playup.2409.00001"
+
+resend_time = 10
+jam = 0
+last_send = 0
+# hari delete file kismet
+file_del_days = 10
+
+KISMET_USER = "iot"
+KISMET_PASSWORD = "waraswae"
+
+username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
+
+path_kismet_data = os.path.expanduser(f'~{username}')
+print(path_kismet_data)
 
 # URL Kismet API
 
@@ -262,19 +279,36 @@ def submit_device_data(device):
         
     
 def get_mac_address():
+    global mac_address_id
     mac_address = uuid.getnode()
-    mac_address_id = (':'.join(['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0,8*6,8)][::-1])).upper()
+    mac_addressA = (':'.join(['{:02x}'.format((mac_address >> elements) & 0xff) for elements in range(0,8*6,8)][::-1])).upper()
     print("mac")
-    print(mac_address_id)
+    print(mac_addressA)
+    mac_address_id = mac_addressA
     #mac_address_id = "7C:83:34:BB:74:D1"
     
-    return mac_address_id
+    return mac_addressA
 
 def get_device_id ():
-    global device_id
+    global device_id, mac_address_id, macADDR
+    
+    isExistlog = os.path.exists("macADDR.txt")
+    if isExistlog:
+        print("MAC ADDR exist")
+        f = open("macADDR.txt", "r")
+        macADDR = f.readline()
+        f.close()
+        print(macADDR)
+    else:
+        print("MAC ADDR not exist")
+        macADDR = get_mac_address()
+        #f = open("macADDR.txt", "w")
+        #f.write(macADDR)
+        #f.close()
+    
     data_device ={
     "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiJERU5DSVRZIiwiaWF0IjoxNzI1NTI3NzY0fQ.1X0pGlp5MEB72489yGXN2re9jTF9B6HyJuxE054Bcsk",
-    "mac_address":get_mac_address(),
+    "mac_address":macADDR,
     "device_type":"Mini PC"}
     
     try:
@@ -290,11 +324,21 @@ def get_device_id ():
             print("JSON Response ", res_json)
             if "data" in res_json:
                 #print("registered")
-                device_id = res_json["data"]["device_id"]
+                device_id = res_json["data"]["device_id"]               
+                
+                isExistlog = os.path.exists("macADDR.txt")
+                if isExistlog:
+                    print("MAC ADDR exist")
+                else:
+                    print("MAC ADDR not exist")
+                    f = open("macADDR.txt", "w")
+                    f.write(macADDR)
+                    f.close()
                 print(f"Data get device id successfully")
                 return True
             else:
                 #print("not registered")
+                
                 return False
             
         
@@ -302,6 +346,27 @@ def get_device_id ():
         print(f"Failed to get device id")
         return False
 
+def delete_old_file():
+    current_time = str(datetime.now().strftime("%Y%m%d"))
+        
+    os.chdir(path_kismet_data)
+        #for fileN in os.listdir(path_kismet_data):
+    for fileN in glob.glob("*.kismet"):
+            
+        x = fileN.split("-")
+        today = datetime.now().strftime("%Y-%m-%d")
+        #year = today.year
+        date_create = date(int(x[1][0:4]),int(x[1][4:6]),int(x[1][6:9]))            
+        get_diff_days = (date.today() - date_create).days
+        print("diff_dasy", get_diff_days)
+            
+        # file_del_days
+        if get_diff_days > file_del_days:
+            isExistdelKISMET = os.path.exists(path_kismet_data + "/" + fileN)
+            if isExistdelKISMET:
+                print("hapus data")
+                os.remove(path_kismet_data + "/" + fileN)
+                    
 def main():
     #devices_data = get_devices()
     #print(devices_data)
@@ -313,6 +378,7 @@ def main():
                 submit_device_data(device)
     else:
         print("mac address not registered")
+    delete_old_file()
     
 if __name__ == "__main__":
     while True:
