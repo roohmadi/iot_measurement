@@ -23,8 +23,8 @@ last_send = 0
 # hari delete file kismet
 file_del_days = 10
 
-KISMET_USER = "iot"
-KISMET_PASSWORD = "waraswae"
+KISMET_USER = "USER_KISMET"
+KISMET_PASSWORD = "PASSWORD_KISMET"
 
 username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
 
