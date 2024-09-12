@@ -155,14 +155,20 @@ def submit_device_data(device):
                 int_sig = int(sig)
                 distance,min_dist, max_dist = estimate_distance(int_sig)
             else:
-                    distance = 0
-                    min_dist = 0
-                    max_dist = 0
+                distance = 0
+                min_dist = 0
+                max_dist = 0
+                last_noise = 0
+                min_noise = 0
+                max_noise = 0
         else:
             sig = 0
             distance = 0
             min_dist = 0
             max_dist = 0
+            last_noise = 0
+            min_noise = 0
+            max_noise = 0
         first_stamp = int(f"{device.get('kismet.device.base.first_time', 'N/A')}")
         last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
         
