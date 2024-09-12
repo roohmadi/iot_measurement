@@ -161,6 +161,7 @@ def submit_device_data(device):
                 last_noise = 0
                 min_noise = 0
                 max_noise = 0
+                sig = 0
         else:
             sig = 0
             distance = 0
