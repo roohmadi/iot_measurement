@@ -23,8 +23,8 @@ last_send = 0
 file_del_days = 10
 bad_chars = ['{', '}', "'"]
 
-KISMET_USER = "iot"
-KISMET_PASSWORD = "waraswae"
+KISMET_USER = "KISMET_USER"            # ganti dengan user kismet
+KISMET_PASSWORD = "KISMET_PASSWORD"    # ganti dengan password kismet
 
 username = os.environ.get('SUDO_USER', os.environ.get('USERNAME'))
 
@@ -54,10 +54,7 @@ headers1 = {
     "Authorization": f"Basic {api_key}"
 }
 
-last_time = 1730808735.466092#time.time()
-print("START TIME:")
-print(last_time)
-print(datetime.fromtimestamp(last_time).strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
+
 
 def connect(host='http://google.com'):
         try:
@@ -117,13 +114,7 @@ def get_device_id_old ():
         res_json = response.json()
         print("JSON Response ", res_json)
         device_id = res_json["data"]["device_id"]
-        #print(type(response.json()))
-        #print(res_json["data"]["device_id"])
-        #print(response)
         
-        #response = requests.post(PHP_URL, data=payload)
-        #print(response)
-        #response.raise_for_status()
         print(f"Data get device id successfully")
         return True
     except requests.exceptions.RequestException as e:
@@ -144,26 +135,18 @@ def get_devices():
         return None
      
 def submit_device_data(device):
-    #print("send data")
     last_time = time.time()
     last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
-    #print("db time:")
-    #print(datetime.fromtimestamp(last_stamp).strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
-    #print("send time:")
-    #print(datetime.fromtimestamp(last_time).strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
-    #print((last_stamp > (last_time - resend_time)))
-    if (last_stamp > (last_time - resend_time)):
-        print("=====")
+    
+    if (last_stamp > (last_time - resend_time)):        
         str_dot11 = f"{device.get('dot11.device','N/A')}"
-        #print(str_dot11)
         if len(str_dot11) > 3:
             strBSSID = re.split(",",re.split("':", str_dot11)[24])[0]
             for i in bad_chars:
                 strBSSID = strBSSID.replace(i, '')
             strBSSID = strBSSID[1:len(strBSSID)]
         str_sig = f"{device.get('kismet.device.base.signal','N/A')}"
-        #print(str_sig)
-        #print(len(str_sig))
+
         if len(str_sig) > 3:
             sig = re.split(",",re.split("':", str_sig)[2])[0]
             last_noise = re.split(",",re.split("':", str_sig)[3])[0]
@@ -172,7 +155,6 @@ def submit_device_data(device):
             if len(sig)>0:
                 int_sig = int(sig)
                 distance,min_dist, max_dist = estimate_distance(int_sig)
-                print(distance)
             else:
                 distance = 0
                 min_dist = 0
@@ -224,10 +206,7 @@ def submit_device_data(device):
         ]
         }
         
-        try:
-            #print(data)
-            #print(device.get('kismet.device.base.name', 'N/A'))
-        
+        try:        
             response = requests.post(url_data, headers=headers_data, json=data)
             print("Status Code", response.status_code)
             print("JSON Response ", response.json())
