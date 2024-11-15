@@ -138,7 +138,7 @@ def submit_device_data(device):
     last_time = time.time()
     last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
     
-    if (last_stamp > (last_time - resend_time)):        
+    if (last_stamp < (last_time - resend_time)):        
         str_dot11 = f"{device.get('dot11.device','N/A')}"
         if len(str_dot11) > 3:
             strBSSID = re.split(",",re.split("':", str_dot11)[24])[0]
@@ -174,11 +174,17 @@ def submit_device_data(device):
         first_stamp = int(f"{device.get('kismet.device.base.first_time', 'N/A')}")
         last_stamp = int(f"{device.get('kismet.device.base.last_time', 'N/A')}")
         
+        if (strBSSID == "00:00:00:00:00:00") :
+            type_device = "Wi-Fi Floating"
+            print(strBSSID)
+        else:
+            type_device = device.get('kismet.device.base.type', 'N/A')
+            
         data = {
         "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiJERU5DSVRZIiwiaWF0IjoxNzI1NTI3NzY0fQ.1X0pGlp5MEB72489yGXN2re9jTF9B6HyJuxE054Bcsk",
         "device_id": device_id,
         "raw_data" : [{
-        "type":device.get('kismet.device.base.type', 'N/A'),
+        "type":type_device,
         "channel":device.get('kismet.device.base.channel', 'N/A'),
         "use": "",
         "bitrate": "",
